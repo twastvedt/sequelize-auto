@@ -5,6 +5,7 @@ const fs = require('fs');
 
 module.exports = {
   Sequelize: Sequelize,
+  views: true, // true to test generating models from views
 
   isSnakeTables() {
     // For mysql+innodb on Windows, table names are all lowercase, so we use snake_case to preserve word boundaries 
@@ -121,8 +122,11 @@ module.exports = {
         test.sequelize.sync().then(function () {
           var tableName = isSnakeTables ? 'history_logs' : 'HistoryLogs';
           var trigger = helpers.getDummyCreateTriggerStatement(tableName);
+          var crview = helpers.getCreateViewStatement(tableName);
           test.sequelize.query(trigger).then(function (_) {
-            done();
+            test.sequelize.query(crview).then(function (_) {
+              done();
+            }, done)
           }, done);
         }, done);
       },
@@ -208,7 +212,7 @@ module.exports = {
           const fileName = path.join(config.directory, file);
           const stat = fs.statSync(fileName);
           if (stat.isFile()) {
-            fs.unlinkSync(fileName);
+            // fs.unlinkSync(fileName);
           }
         });
         callback && callback();
@@ -220,6 +224,7 @@ module.exports = {
     }
 
     try {
+      // success();
       sequelize
         .getQueryInterface()
         .dropAllTables()
@@ -278,5 +283,19 @@ module.exports = {
     if (statement) return statement;
 
     throw new Error("CREATE TRIGGER not set for dialect " + this.getTestDialect());
+  },
+
+  // for testing view inclusion/exclusion
+  getCreateViewStatement: function(tableName) {
+    var statement = {
+      mysql:    'CREATE OR REPLACE VIEW v_history AS SELECT aRandomId FROM ' + tableName + ';',
+      postgres: 'CREATE OR REPLACE VIEW v_history AS SELECT "aRandomId" FROM "' + tableName + '";',
+      mssql:    'CREATE OR ALTER VIEW v_history AS SELECT aRandomId FROM ' + tableName + ';',
+      sqlite:   'DROP VIEW IF EXISTS [v_history]; CREATE VIEW v_history AS SELECT aRandomId FROM ' + tableName + ';'
+    }[this.getTestDialect()];
+
+    if (statement) return statement;
+
+    throw new Error("CREATE VIEW not set for dialect " + this.getTestDialect());
   }
 };

@@ -24,6 +24,7 @@ const argv = require('yargs')
   .alias('n', 'no-write').boolean('n')
   .alias('s', 'schema').string('s')
   .alias('l', 'lang').string('l')
+  .alias('v', 'views').boolean('v')
   .describe('h', 'IP/Hostname for the database.')
   .describe('d', 'Database name.')
   .describe('u', 'Username for database.')
@@ -41,6 +42,7 @@ const argv = require('yargs')
   )
   .describe('t', 'Comma-separated names of tables to import')
   .describe('T', 'Comma-separated names of tables to skip')
+  .describe('v', 'Include database views in generated models')
   .describe('cm', 'Set case of model names: c|l|o|p|u \n c = camelCase \n l = lower_case \n o = original (default) \n p = PascalCase \n u = UPPER_CASE')
   .describe('cf', 'Set case of file names: c|l|o|p|u')
   .describe('cp', 'Set case of property names: c|l|o|p|u')
@@ -84,9 +86,10 @@ configFile.schema = argv.s || configFile.schema;
 configFile.typescript = (lang === 'ts');
 configFile.es6 = (lang === 'es6');
 configFile.esm = (lang === 'esm');
-configFile.caseModel = argv.cm || configFile.caseModel || 'o'
-configFile.caseFile = argv.cf || configFile.caseFile || 'o'
-configFile.caseProp = argv.cp || configFile.caseProp || 'o'
+configFile.caseModel = argv.cm || configFile.caseModel || 'o';
+configFile.caseFile = argv.cf || configFile.caseFile || 'o';
+configFile.caseProp = argv.cp || configFile.caseProp || 'o';
+configFile.views = true; // argv.v || configFile.views || false;
 
 console.log(configFile);
 

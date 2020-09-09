@@ -41,6 +41,9 @@ describe(helpers.getTestDialectTeaser('sequelize-auto generate'), function() {
       if (_.isString(self.sequelize.options.dialect)) {
         execString += ` -e ${self.sequelize.options.dialect}`;
       }
+      if (helpers.views) {
+        execString += ' -v'; // test view generation
+      }
       // execString += ' -l es6'; // uncomment to test es6 file generation
       if (helpers.isSnakeTables()) {
         execString += ' --cm p --cf p'; // test PascalCase conversion from snake_case tables
@@ -209,6 +212,27 @@ describe(helpers.getTestDialectTeaser('sequelize-auto generate'), function() {
         done();
       } catch (err) {
         console.log('Failed to load Users model:', err);
+        done(err);
+      }
+    });
+
+    it('the v_history model', function(done) {
+      if (!helpers.views) {
+        return done();
+      }
+      try {
+        const vpath = path.join(testConfig.directory, 'v_history');
+        debug('Importing:', vpath);
+
+        const vHist = self.sequelize.import ? self.sequelize.import(vpath) : require(vpath)(self.sequelize, helpers.Sequelize);
+        const tableName = 'v_history'; // isSnakeTables ? 'users' : 'Users';
+        const raw = vHist.rawAttributes;
+        expect(vHist.tableName).to.equal(tableName);
+        expect(vHist.options).to.not.have.property("hasTrigger");
+        expect(raw['aRandomId'], 'aRandomId').to.exist;
+        done();
+      } catch (err) {
+        console.log('Failed to load v_history model:', err);
         done(err);
       }
     });
