@@ -6,7 +6,6 @@ const argv = require('yargs')
   .usage(
     'Usage: sequelize-auto -h <host> -d <database> -u <user> -x [password] -p [port]  --dialect [dialect] -c [/path/to/config] -o [/path/to/models] -t [tableName]'
   )
-  .demand(['h', 'd'])
   .alias('h', 'host').string('h')
   .alias('d', 'database').string('d')
   .alias('u', 'user').string('u')
@@ -82,7 +81,7 @@ configFile.additional = additional;
 configFile.dialect = argv.e || configFile.dialect || 'mysql';
 configFile.port = argv.p || configFile.port || getDefaultPort(configFile.dialect);
 configFile.host = argv.h || configFile.host || 'localhost';
-configFile.storage = argv.d;
+configFile.database = argv.d || configFile.database;
 configFile.tables = configFile.tables || (argv.t && argv.t.split(',')) || null;
 configFile.skipTables = configFile.skipTables || (argv.T && argv.T.split(',')) || null;
 configFile.schema = argv.s || configFile.schema;
@@ -93,6 +92,8 @@ configFile.caseProp = argv.cp || configFile.caseProp || 'o';
 configFile.noWrite = argv.n || configFile.noWrite || false;
 configFile.views = argv.v || configFile.views || false;
 configFile.singularize = argv.sg || configFile.singularize || false;
+configFile.password = !!argv.x ? '' + argv.x : configFile.password || null;
+configFile.username = argv.u || configFile.username;
 
 console.log(configFile);
 
@@ -107,7 +108,7 @@ function getDefaultPort(dialect) {
   }
 }
 
-const auto = new SequelizeAuto(argv.d, argv.u, !!argv.x ? '' + argv.x : null, configFile);
+const auto = new SequelizeAuto(configFile.database, argv.u, configFile.password, configFile);
 
 auto.run().then(() => {
   console.log("Done!");
