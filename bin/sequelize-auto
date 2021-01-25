@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 const SequelizeAuto = require('../');
 const path = require('path');
+const yargs = require('yargs');
 
-const argv = require('yargs')
+const argv = yargs
   .usage(
     'Usage: sequelize-auto -h <host> -d <database> -u <user> -x [password] -p [port]  --dialect [dialect] -c [/path/to/config] -o [/path/to/models] -t [tableName]'
   )
@@ -94,6 +95,10 @@ configFile.views = argv.v || configFile.views || false;
 configFile.singularize = argv.sg || configFile.singularize || false;
 configFile.password = argv.x ? '' + argv.x : configFile.password || null;
 configFile.username = argv.u || configFile.username;
+
+if (!configFile.database) {
+  yargs.demand('d');
+}
 
 console.log(configFile);
 
