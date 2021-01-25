@@ -92,7 +92,7 @@ configFile.caseProp = argv.cp || configFile.caseProp || 'o';
 configFile.noWrite = argv.n || configFile.noWrite || false;
 configFile.views = argv.v || configFile.views || false;
 configFile.singularize = argv.sg || configFile.singularize || false;
-configFile.password = !!argv.x ? '' + argv.x : configFile.password || null;
+configFile.password = argv.x ? '' + argv.x : configFile.password || null;
 configFile.username = argv.u || configFile.username;
 
 console.log(configFile);
